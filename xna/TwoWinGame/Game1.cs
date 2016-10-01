@@ -16,28 +16,25 @@ namespace TwoWinGame
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        // Change this value to any desired number to display more or less sprites on the screen
         const int NUMBER_OF_SPRITES = 100;
+
+        // Change this value to impact the horizontal component of a sprite SPEED
+        // Notice that the speeds are randomly commputed
+        const int X_MAX_SPEED = 100;
+        // Change this value to impact the vertical component of a sprite SPEED
+        const int Y_MAX_SPEED = 600;
         
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
         Texture2D spriteTexture;
         Vector2[] positions = new Vector2[NUMBER_OF_SPRITES];
-
-        //Vector2 almPosition = Vector2.Zero, fatStarPosition = new Vector2(100.0f, 0.0f);
-
         Vector2[] speeds = new Vector2[NUMBER_OF_SPRITES];
-
-
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
-
-            // Initializes the positions and speeds
-           
-           
+            Content.RootDirectory = "Content";   
         }
 
         /// <summary>
@@ -48,16 +45,15 @@ namespace TwoWinGame
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            // Initializes the positions and speeds
             Random randomizer = new Random();
             for (int i = 0; i < NUMBER_OF_SPRITES; i++)
             {
                 positions[i] = new Vector2(randomizer.Next(0, graphics.GraphicsDevice.Viewport.Width) * 1.0f,
                     randomizer.Next(0, graphics.GraphicsDevice.Viewport.Height) * 1.0f);
                 int[] signs = new int[] { -1, +1 };
-                speeds[i] = new Vector2(randomizer.Next(1, 1000) * 1.0f * signs[randomizer.Next(0, 2)],
-                    randomizer.Next(1, 600) * 1.0f * signs[randomizer.Next(0, 2)]);
-
+                speeds[i] = new Vector2(randomizer.Next(1, X_MAX_SPEED) * 1.0f * signs[randomizer.Next(0, 2)],
+                    randomizer.Next(1, Y_MAX_SPEED) * 1.0f * signs[randomizer.Next(0, 2)]);
             }
             base.Initialize();
         }
@@ -70,10 +66,7 @@ namespace TwoWinGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            // almTexture = Content.Load<Texture2D>("Alain_Lompo");
             spriteTexture = Content.Load<Texture2D>("red-star");
-            
-            // TODO: use this.Content to load your game content here
         }
 
         /// <summary>
@@ -82,7 +75,6 @@ namespace TwoWinGame
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
         }
 
         protected void updatePositions(GameTime gameTime)
@@ -99,14 +91,12 @@ namespace TwoWinGame
                 {
                     speeds[i].X *= -1;
                     positions[i].X = maxX;
-
                 }
 
                 else if (positions[i].X < minX)
                 {
                     speeds[i].X *= -1;
                     positions[i].X = minX;
-
                 }
 
                 if (positions[i].Y > maxY)
@@ -120,7 +110,6 @@ namespace TwoWinGame
                     speeds[i].Y *= -1;
                     positions[i].Y = minY;
                 }
-
             }
 
         }
@@ -139,7 +128,6 @@ namespace TwoWinGame
                 this.Exit();
 
             // TODO: Add your update logic here
-
             base.Update(gameTime);
         }
 
@@ -150,17 +138,13 @@ namespace TwoWinGame
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
             // TODO: Add your drawing code here
             spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
             for (int i = 0; i < NUMBER_OF_SPRITES; i++)
             {
                 spriteBatch.Draw(spriteTexture, positions[i], Color.White);
             }
-            
             spriteBatch.End();
-
-
             base.Draw(gameTime);
         }
     }
