@@ -23,7 +23,7 @@ namespace Xna3DViewer
         Vector3 modelPosition = Vector3.Zero;
         float modelRotation = 0.0f;
         Vector3 cameraPosition = new Vector3(0.0f, 50.0f, 5000.0f);
-
+        Vector3 modelVelocity = Vector3.Zero;
 
         public Game1()
         {
@@ -76,13 +76,72 @@ namespace Xna3DViewer
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            if ( GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
+                || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
 
-            // TODO: Add your update logic here
-            modelRotation += (float)gameTime.ElapsedGameTime.TotalMilliseconds * MathHelper.ToRadians(0.1f);
+            // Get some input
+            UpdateInput();
+
+            // Add velocity to the current position
+            modelPosition += modelVelocity;
+
+            // Bleed off velocity over time
+            modelVelocity *= 0.95f;
+
+            // We stop the automatic rotation, so that we can control it manually
+            // modelRotation += (float)gameTime.ElapsedGameTime.TotalMilliseconds * MathHelper.ToRadians(0.1f);
 
             base.Update(gameTime);
+        }
+
+
+        protected void UpdateInput()
+        {
+            // Get the game pad state.
+            GamePadState currentState = GamePad.GetState(PlayerIndex.One);
+            KeyboardState currentKeyState = Keyboard.GetState();
+            //if (currentState.IsConnected)
+            //{
+                // Rotate the model using the left thumbstick, and scale it down
+                    if(currentKeyState.IsKeyDown(Keys.A))
+                modelRotation += 0.10f;
+                else if (currentKeyState.IsKeyDown(Keys.D))
+                modelRotation -= 0.10f;
+                else
+                modelRotation -= currentState.ThumbSticks.Left.X * 0.10f;
+
+                // Create some velocity if the right trigger is down.
+                Vector3 modelVelocityAdd = Vector3.Zero;
+
+                // Find out what direction we should be thrusting, 
+                // using rotation.
+                modelVelocityAdd.X = -(float)Math.Sin(modelRotation);
+                modelVelocityAdd.Z = -(float)Math.Cos(modelRotation);
+
+                // Now scale our direction by how hard the trigger is down.
+                if (currentKeyState.IsKeyDown(Keys.W))
+                    modelVelocityAdd *= 1;
+                else
+                modelVelocityAdd *= currentState.Triggers.Right;
+
+                // Finally, add this vector to our velocity.
+                modelVelocity += modelVelocityAdd;
+
+                GamePad.SetVibration(PlayerIndex.One,
+                    currentState.Triggers.Right,
+                    currentState.Triggers.Right);
+
+
+                // In case you get lost, press A to warp back to the center.
+                if (currentState.Buttons.A == ButtonState.Pressed || currentKeyState.IsKeyDown(Keys.Enter))
+                {
+                    modelPosition = Vector3.Zero;
+                    modelVelocity = Vector3.Zero;
+                    modelRotation = 0.0f;
+                }
+            //}
+
         }
 
         /// <summary>
@@ -107,9 +166,7 @@ namespace Xna3DViewer
                         * Matrix.CreateTranslation(modelPosition);
                     effect.View = Matrix.CreateLookAt(cameraPosition, Vector3.Zero, Vector3.Up);
                     effect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45.0f), aspectRatio, 1.0f, 10000.0f);
-
                 }
-
                 mesh.Draw();
 
             }
