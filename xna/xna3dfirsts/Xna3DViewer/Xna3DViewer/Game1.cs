@@ -19,9 +19,15 @@ namespace Xna3DViewer
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Model myModel;
+        
+        SoundEffect soundEngine;
+        SoundEffectInstance soundEngineInstance;
+        SoundEffect soundHyperspaceActivation;
+
         float aspectRatio;
-        Vector3 modelPosition = Vector3.Zero;
         float modelRotation = 0.0f;
+
+        Vector3 modelPosition = Vector3.Zero;
         Vector3 cameraPosition = new Vector3(0.0f, 50.0f, 5000.0f);
         Vector3 modelVelocity = Vector3.Zero;
 
@@ -55,7 +61,13 @@ namespace Xna3DViewer
 
             // TODO: use this.Content to load your game content here
             myModel = Content.Load<Model>("Models\\p1_wedge");
+            soundEngine = Content.Load<SoundEffect>("Audio\\Waves\\engine_2");
+            soundEngineInstance = soundEngine.CreateInstance();
+            soundHyperspaceActivation =
+                Content.Load<SoundEffect>("Audio\\Waves\\hyperspace_activate");
+
             aspectRatio = graphics.GraphicsDevice.Viewport.AspectRatio;
+
 
         }
 
@@ -132,6 +144,25 @@ namespace Xna3DViewer
                     currentState.Triggers.Right,
                     currentState.Triggers.Right);
 
+                //Play engine sound only when the engine is on.
+                //if (currentState.Triggers.Right > 0)
+                if (currentKeyState.IsKeyDown(Keys.W))
+                {
+
+                    if (soundEngineInstance.State == SoundState.Stopped)
+                    {
+                        soundEngineInstance.Volume = 0.75f;
+                        soundEngineInstance.IsLooped = true;
+                        soundEngineInstance.Play();
+                    }
+                    else
+                        soundEngineInstance.Resume();
+                }
+                else if (currentState.Triggers.Right == 0)
+                {
+                    if (soundEngineInstance.State == SoundState.Playing)
+                        soundEngineInstance.Pause();
+                }
 
                 // In case you get lost, press A to warp back to the center.
                 if (currentState.Buttons.A == ButtonState.Pressed || currentKeyState.IsKeyDown(Keys.Enter))
@@ -139,6 +170,7 @@ namespace Xna3DViewer
                     modelPosition = Vector3.Zero;
                     modelVelocity = Vector3.Zero;
                     modelRotation = 0.0f;
+                    soundHyperspaceActivation.Play();
                 }
             //}
 
